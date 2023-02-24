@@ -1,0 +1,16 @@
+#root {
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+ nav {
+    background-color: darkgray;
+    flex-basis: 80px;
+    padding: 24px;
+ }
+
+ main {
+     flex-grow: 1;
+     padding: 24px;
+ }
