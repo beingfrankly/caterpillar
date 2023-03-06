@@ -7,6 +7,18 @@ import ContentItem from "./routes/content/contentItem";
 import ContentOverview from "./routes/content/contentOverview";
 import ErrorPage from "./routes/error-page";
 import Root from "./routes/root";
+import { getAllContent, getContentItem } from "./utils/getContent";
+
+export async function contentLoader() {
+  const content = await getAllContent();
+  return { content };
+}
+
+export async function contentItemLoader({ params }: { params: any }) {
+    console.log(params.contentId);
+  const contentItem = getContentItem(params.contentId);
+  return { contentItem };
+}
 
 const router = createBrowserRouter([
   {
@@ -17,10 +29,12 @@ const router = createBrowserRouter([
       {
         path: "content",
         element: <ContentOverview />,
+        loader: contentLoader,
       },
       {
         path: "content/:contentId",
         element: <ContentItem />,
+        loader: contentItemLoader,
       },
     ],
   },

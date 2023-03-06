@@ -1,30 +1,19 @@
-import { BaseDirectory, FileEntry, readDir } from "@tauri-apps/api/fs";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
+import { contentLoader } from "../..";
 
 export default function ContentOverview() {
-  const [entries, setEntries] = useState<FileEntry[] | undefined>(undefined);
-
-  useEffect(() => {
-    (async () => {
-      const entries = await readDir("", {
-        dir: BaseDirectory.AppData,
-        recursive: true,
-      });
-      setEntries(entries);
-    })();
-
-    return () => {};
-  }, []);
+  const { content } = useLoaderData() as Awaited<
+    ReturnType<typeof contentLoader>
+  >
 
   return (
     <>
       <h1>Content</h1>
       <ul>
-        {entries &&
-          entries.map((entry) => (
-            <li key={entry.name}>
-              <Link to="1">{entry.name}</Link>
+        {content &&
+          content.map((entry) => (
+            <li key={entry.id}>
+              <Link to={entry.id.toString()}>{entry.title}</Link>
             </li>
           ))}
       </ul>
