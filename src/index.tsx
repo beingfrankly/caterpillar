@@ -15,8 +15,7 @@ export async function contentLoader() {
 }
 
 export async function contentItemLoader({ params }: { params: any }) {
-    console.log(params.contentId);
-  const contentItem = getContentItem(params.contentId);
+  const contentItem = await getContentItem(params.contentId);
   return { contentItem };
 }
 

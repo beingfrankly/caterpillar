@@ -15,7 +15,7 @@
       "all": false,
       "fs": {
         "all": true,
-        "scope": ["$APPDATA", "$APPDATA/**"]
+        "scope": ["$APPDATA", "$APPDATA/**", "$APPDATA/content/**"]
       },
       "path": {
         "all": true

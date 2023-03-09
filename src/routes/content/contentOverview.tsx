@@ -4,7 +4,7 @@ import { contentLoader } from "../..";
 export default function ContentOverview() {
   const { content } = useLoaderData() as Awaited<
     ReturnType<typeof contentLoader>
-  >
+  >;
 
   return (
     <>
@@ -13,7 +13,7 @@ export default function ContentOverview() {
         {content &&
           content.map((entry) => (
             <li key={entry.id}>
-              <Link to={entry.id.toString()}>{entry.title}</Link>
+              <Link to={entry.id}>{entry.title}</Link>
             </li>
           ))}
       </ul>

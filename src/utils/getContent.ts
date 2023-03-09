@@ -5,40 +5,31 @@ import {
   readTextFile,
 } from "@tauri-apps/api/fs";
 import matter from "gray-matter";
+import { getDatabase } from "./db";
 
 // TODO: Replace this with a more future proof solution. Possibly switch react-scripts with vite.
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
-// TODO: Replace this with Tauri SQLite
-export let storage: Map<string, MetaFile>;
+export const CONTENT_DIR = "content";
 
-export async function getAllContent(): Promise<MetaFile[]> {
-  if (typeof storage === "undefined") {
-    storage = new Map<string, MetaFile>();
-
-    const files = await readDir("", {
-      dir: BaseDirectory.AppData,
-      recursive: true,
-    });
-
-    const content = await Promise.all(files.map((file) => buildMetaFile(file)));
-    content.forEach((entry) => storage.set(entry.id, entry));
-  }
-
-  console.dir(storage);
-  return Array.from(storage, ([_key, value]) => ({
-    ...value,
-  }));
+export async function getAllContent(): Promise<MetaFileIndex[]> {
+  const db = await getDatabase();
+  return await db.select<MetaFileIndex[]>("SELECT * FROM content_index");
 }
 
-export function getContentItem(contentId: string): MetaFile | undefined {
-  const contentItem = storage.get(contentId);
-  return contentItem;
+export async function getContentItem(contentId: string): Promise<MetaFile> {
+  const db = await getDatabase();
+  const metaFileIndex = await db.select<MetaFileIndex>(
+    "SELECT * FROM content_index WHERE id = $contentId",
+    [contentId]
+  );
+  return buildMetaFile(metaFileIndex);
 }
 
-async function buildMetaFile(file: FileEntry): Promise<MetaFile> {
-  const { path, name } = file;
-  const content = await readTextFile(name ?? "", {
+async function buildMetaFile(file: MetaFileIndex): Promise<MetaFile> {
+  const { path, fileName } = file;
+
+  const content = await readTextFile(`${CONTENT_DIR}/${fileName}` ?? "", {
     dir: BaseDirectory.AppData,
   });
   const frontmatter = matter(content);
@@ -56,4 +47,11 @@ export type MetaFile = {
   title: string;
   path: string;
   content: string;
+};
+
+export type MetaFileIndex = {
+  id: string;
+  title: string;
+  path: string;
+  fileName: string;
 };
