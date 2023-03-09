@@ -8,6 +8,6 @@ export async function getDatabase(): Promise<Database> {
 export async function initDatabase() {
   const db = await getDatabase();
   return await db.execute(
-    "CREATE TABLE content_index (id TEXT PRIMARY KEY UNIQUE, title TEXT, path TEXT, fileName TEXT)"
+    "CREATE TABLE content_index (id TEXT PRIMARY KEY UNIQUE, title TEXT, path TEXT, name TEXT)"
   );
 }
