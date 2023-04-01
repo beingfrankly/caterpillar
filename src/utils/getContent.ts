@@ -1,65 +1,40 @@
-import {
-  BaseDirectory,
-  FileEntry,
-  readDir,
-  readTextFile,
-} from "@tauri-apps/api/fs";
+import { FileEntry } from "@tauri-apps/api/fs";
 import matter from "gray-matter";
-import { getDatabase } from "./db";
+import { insertContentItem, selectContentItem, selectContentItems } from "./db";
+import { getFile, getFiles } from "./handle-file";
 
 // TODO: Replace this with a more future proof solution. Possibly switch react-scripts with vite.
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
-export const CONTENT_DIR = "content";
+export async function getAllContent(): Promise<ContentItemIndex[] | undefined> {
+  const contentItemIndexArray = await selectContentItems();
 
-export async function getAllContent(): Promise<MetaFileIndex[]> {
-  const db = await getDatabase();
-  const result = await db.select<MetaFileIndex[]>(
-    "SELECT * FROM content_index"
-  );
-
-  if (result.length <= 0) {
-    const files = await readDir("content", {
-      dir: BaseDirectory.AppData,
-      recursive: true,
-    });
-
+  if (contentItemIndexArray && contentItemIndexArray.length <= 0) {
+    const files = await getFiles();
     const content = await Promise.all(
-      files.map((file) => buildMetaFileIndex(file))
+      files.map((file) => buildContentItemIndex(file))
     );
-    content.forEach((entry) => addContentItem(entry));
+    content.forEach((entry) => insertContentItem(entry));
     return content;
   } else {
-    return result;
+    return contentItemIndexArray;
   }
 }
 
-export async function getContentItem(contentId: string): Promise<MetaFile> {
-  const db = await getDatabase();
-  const metaFileIndex = await db.select<MetaFileIndex>(
-    "SELECT * FROM content_index WHERE id = $1",
-    [contentId]
-  );
-  return buildMetaFile(metaFileIndex);
+export async function getContentItem(
+  contentId: string
+): Promise<ContentItem | undefined> {
+  const contentItem = await selectContentItem(contentId);
+  return contentItem ? buildContentItem(contentItem) : undefined;
 }
 
-export async function addContentItem(content: MetaFileIndex) {
-  const { id, path, name, title } = content;
-  const db = await getDatabase();
-  return await db.execute(
-    "INSERT INTO content_index (id, path, name, title) VALUES ($1, $2, $3, $4)",
-    [id, path, name, title]
-  );
-}
-
-async function buildMetaFile(
-  file: MetaFileIndex | FileEntry
-): Promise<MetaFile> {
+async function buildContentItem(
+  file: ContentItemIndex | FileEntry
+): Promise<ContentItem> {
   const { path, name } = file;
 
-  const content = await readTextFile(`${CONTENT_DIR}/${name}` ?? "", {
-    dir: BaseDirectory.AppData,
-  });
+  // TODO: Handle undefined name in a proper way
+  const content = await getFile(name ?? "");
   const frontmatter = matter(content);
 
   return {
@@ -67,17 +42,16 @@ async function buildMetaFile(
     title: frontmatter.data?.title,
     path: path,
     content: frontmatter.content,
-  } as MetaFile;
+  } as ContentItem;
 }
 
-async function buildMetaFileIndex(
-  file: MetaFileIndex | FileEntry
-): Promise<MetaFileIndex> {
+async function buildContentItemIndex(
+  file: ContentItemIndex | FileEntry
+): Promise<ContentItemIndex> {
   const { path, name } = file;
 
-  const content = await readTextFile(`${CONTENT_DIR}/${name}` ?? "", {
-    dir: BaseDirectory.AppData,
-  });
+  // TODO: Handle undefined name in a proper way
+  const content = await getFile(name ?? "");
   const frontmatter = matter(content);
 
   return {
@@ -85,17 +59,17 @@ async function buildMetaFileIndex(
     title: frontmatter.data?.title,
     path: path,
     name: name,
-  } as MetaFileIndex;
+  } as ContentItemIndex;
 }
 
-export type MetaFile = {
+export type ContentItem = {
   id: string;
   title: string;
   path: string;
   content: string;
 };
 
-export type MetaFileIndex = {
+export type ContentItemIndex = {
   id: string;
   title: string;
   path: string;
