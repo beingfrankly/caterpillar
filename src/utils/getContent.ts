@@ -28,7 +28,7 @@ export async function getContentItem(
   return contentItem ? buildContentItem(contentItem) : undefined;
 }
 
-async function buildContentItem(
+export async function buildContentItem(
   file: ContentItemIndex | FileEntry
 ): Promise<ContentItem> {
   const { path, name } = file;
@@ -45,7 +45,7 @@ async function buildContentItem(
   } as ContentItem;
 }
 
-async function buildContentItemIndex(
+export async function buildContentItemIndex(
   file: ContentItemIndex | FileEntry
 ): Promise<ContentItemIndex> {
   const { path, name } = file;

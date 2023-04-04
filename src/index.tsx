@@ -3,6 +3,9 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
+import CreateContent, {
+  createContentAction,
+} from "./routes/content/createContent";
 import ContentItem from "./routes/content/contentItem";
 import ContentOverview from "./routes/content/contentOverview";
 import ErrorPage from "./routes/error-page";
@@ -34,6 +37,11 @@ const router = createBrowserRouter([
         path: "content/:contentId",
         element: <ContentItem />,
         loader: contentItemLoader,
+      },
+      {
+        path: "content/create",
+        element: <CreateContent />,
+        action: createContentAction,
       },
     ],
   },
