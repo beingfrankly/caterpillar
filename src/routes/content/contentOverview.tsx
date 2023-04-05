@@ -9,14 +9,28 @@ export default function ContentOverview() {
   return (
     <>
       <h1>Content</h1>
-      <ul>
-        {content &&
-          content.map((entry) => (
-            <li key={entry.id}>
-              <Link to={entry.id}>{entry.title}</Link>
-            </li>
-          ))}
-      </ul>
+      <table>
+        <caption>Content</caption>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {content &&
+            content.map((entry) => (
+              <tr key={entry.id}>
+                <td>{entry.id}</td>
+                <td>{entry.title}</td>
+                <td>
+                  <Link to={entry.id}>View</Link>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
       <Link to="create">Create new content</Link>
     </>
   );
