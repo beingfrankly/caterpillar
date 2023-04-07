@@ -1,4 +1,3 @@
 @layer reset, base, overrides;
 
-@import '@acab/reset.css' layer(reset);
-@import './base.css' layer(base);
+@import 'base.css' layer(base);
