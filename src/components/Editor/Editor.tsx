@@ -1,8 +1,12 @@
-import { $getRoot, $getSelection } from "lexical";
+import { $getRoot, $getSelection, EditorState } from "lexical";
 import { CodeNode } from "@lexical/code";
 import { LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
-import { $convertFromMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS,
+} from "@lexical/markdown";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -14,6 +18,7 @@ import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPl
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import TreeViewPlugin from "../plugins/TreeView";
 import theme from "./theme/EditorTheme";
+import SavePlugin from "./plugins/SavePlugin";
 
 const EDITOR_NODES = [
   CodeNode,
@@ -30,9 +35,11 @@ function onChange(editorState: any) {
   editorState.read(() => {
     // Read the contents of the EditorState here.
     const root = $getRoot();
-    const selection = $getSelection();
+    // const selection = $getSelection();
 
-    console.debug(root, selection);
+    const markdown = $convertToMarkdownString(TRANSFORMERS, root);
+    console.log({ markdown });
+    // console.debug(root, selection);
   });
 }
 
@@ -50,7 +57,13 @@ function Placeholder() {
 function onError(error: any) {
   console.error(error);
 }
-export function Editor({ content }: { content: string }) {
+export function Editor({
+  content,
+  saveCallback,
+}: {
+  content: string;
+  saveCallback: any;
+}) {
   const initialConfig = {
     editorState: () => $convertFromMarkdownString(content, TRANSFORMERS),
     nodes: EDITOR_NODES,
@@ -59,18 +72,21 @@ export function Editor({ content }: { content: string }) {
     onError,
   };
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <RichTextPlugin
-        contentEditable={<ContentEditable />}
-        placeholder={<Placeholder />}
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-      <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-      <ListPlugin />
-      <LinkPlugin />
-      <OnChangePlugin onChange={onChange} />
-      <TreeViewPlugin />
-    </LexicalComposer>
+    <>
+      <LexicalComposer initialConfig={initialConfig}>
+        <RichTextPlugin
+          contentEditable={<ContentEditable />}
+          placeholder={<Placeholder />}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        <ListPlugin />
+        <LinkPlugin />
+        <OnChangePlugin onChange={onChange} />
+        <SavePlugin onSaveCallback={saveCallback} />
+        <TreeViewPlugin />
+      </LexicalComposer>
+    </>
   );
 }
 

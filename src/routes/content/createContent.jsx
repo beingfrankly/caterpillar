@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid/async";
 import { Form, redirect } from "react-router-dom";
-import { createFile } from "../../utils/handle-file";
+import { createOrUpdateFile } from "../../utils/handle-file";
 
 export default function CreateContent() {
   return (
@@ -19,7 +19,7 @@ export async function createContentAction({ request }) {
   const id = await nanoid();
   const title = data.get("title");
 
-  const file = await createFile(id, title);
+  const file = await createOrUpdateFile(id, title);
 
   if (file) {
     return redirect("/content");

@@ -51,14 +51,14 @@ export async function selectContentItems(): Promise<
   }
 }
 
-export async function insertContentItem(
+export async function upsertContentItem(
   contentItemIndex: ContentItemIndex
 ): Promise<QueryResult | undefined> {
   try {
     const { id, path, name, title } = contentItemIndex;
     const db = await getDatabase();
     const result = await db.execute(
-      "INSERT INTO content_index (id, path, name, title) VALUES ($1, $2, $3, $4)",
+      "INSERT INTO content_index (id, path, name, title) VALUES ($1, $2, $3, $4) ON CONFLICT(id) DO UPDATE SET path=excluded.path, name=excluded.name, title=excluded.title",
       [id, path, name, title]
     );
     db.close();

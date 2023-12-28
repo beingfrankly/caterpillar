@@ -5,22 +5,26 @@ import {
   FileEntry,
   readTextFile,
 } from "@tauri-apps/api/fs";
-import { insertContentItem } from "./db";
+import { upsertContentItem } from "./db";
 import { buildContentItemIndex } from "./getContent";
 
 export const CONTENT_DIR = "content";
 
-export async function createFile(
+export async function createOrUpdateFile(
   contentId: string,
-  title: string
+  title: string,
+  content?: string
 ): Promise<boolean> {
-  const content = `---
+  const fileContent = `---
 id: ${contentId}
 title: ${title}
----`;
+---
+${content || ""}`;
+
+  const fileName = `${kebabCase(title)}.md`;
 
   try {
-    const file = await readTextFile(`${CONTENT_DIR}/${kebabCase(title)}.md`, {
+    const file = await readTextFile(`${CONTENT_DIR}/${fileName}.md`, {
       dir: BaseDirectory.AppData,
     });
 
@@ -30,16 +34,16 @@ title: ${title}
     console.error(e);
   }
 
-  await writeTextFile(`${CONTENT_DIR}/${kebabCase(title)}.md`, content, {
+  await writeTextFile(`${CONTENT_DIR}/${fileName}.md`, fileContent, {
     dir: BaseDirectory.AppConfig,
   });
 
   const contentItemIndex = await buildContentItemIndex({
-    name: `${kebabCase(title)}.md`,
-    path: `${CONTENT_DIR}/${kebabCase(title)}.md`,
+    name: fileName,
+    path: `${CONTENT_DIR}/${fileName}.md`,
   });
 
-  await insertContentItem(contentItemIndex);
+  await upsertContentItem(contentItemIndex);
 
   return true;
 }

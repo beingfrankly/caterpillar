@@ -1,6 +1,6 @@
 import { FileEntry } from "@tauri-apps/api/fs";
 import matter from "gray-matter";
-import { insertContentItem, selectContentItem, selectContentItems } from "./db";
+import { upsertContentItem, selectContentItem, selectContentItems } from "./db";
 import { getFile, getFiles } from "./handle-file";
 
 // TODO: Replace this with a more future proof solution. Possibly switch react-scripts with vite.
@@ -14,7 +14,7 @@ export async function getAllContent(): Promise<ContentItemIndex[] | undefined> {
     const content = await Promise.all(
       files.map((file) => buildContentItemIndex(file))
     );
-    content.forEach((entry) => insertContentItem(entry));
+    content.forEach((entry) => upsertContentItem(entry));
     return content;
   } else {
     return contentItemIndexArray;
